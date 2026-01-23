@@ -1,0 +1,14 @@
+{
+    "name": "map-blocks/cat-map",
+    "title": "Category Map",
+    "description": "A block to display the location of posts in a category on a map.",
+    "category": "embed",
+    "icon": "location-alt",
+    "keywords": ["map"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "align": ["wide", "full"],
+    "style": "lib-css-map-blocks"
+}

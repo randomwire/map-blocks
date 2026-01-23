@@ -1,0 +1,14 @@
+{
+    "name": "map-blocks/post-map",
+    "title": "Post Map",
+    "description": "A block to display a single pin on a map.",
+    "category": "embed",
+    "icon": "location",
+    "keywords": ["map"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "align": ["wide", "full"],
+    "style": "lib-css-map-blocks"
+}

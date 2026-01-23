@@ -1,0 +1,14 @@
+{
+    "name": "map-blocks/archive-map",
+    "title": "Archive Map",
+    "description": "A block to display all posts with a location on a map.",
+    "category": "embed",
+    "icon": "location-alt",
+    "keywords": ["map", "archive"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "align": ["wide", "full"],
+    "style": "lib-css-map-blocks"
+}
