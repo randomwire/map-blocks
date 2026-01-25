@@ -13,6 +13,9 @@
 
 $id = uniqid('mb_');
 $classes = 'map_blocks';
+if (!empty($block['align'])) {
+    $classes .= ' align' . $block['align'];
+}
 
 // Initialize defaults.
 $map = null;

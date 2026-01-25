@@ -13,6 +13,9 @@
 
 $id = uniqid('mb_');
 $classes = 'map_blocks';
+if (!empty($block['align'])) {
+    $classes .= ' align' . $block['align'];
+}
 
 // Validate category ID.
 $cat_id = absint(get_query_var('cat'));

@@ -2,7 +2,7 @@
 /**
  * Archive Map Block
  *
- * Displays all posts with a location on a map, without category filtering.
+ * Displays all posts with a location on a map with marker clustering.
  *
  * Required ACF fields for this block:
  * - map (Google Map): Center point for the map
@@ -17,6 +17,9 @@
 
 $id = uniqid('mb_');
 $classes = 'map_blocks';
+if (!empty($block['align'])) {
+    $classes .= ' align' . $block['align'];
+}
 
 // Initialize defaults (Rome center as fallback).
 $map_zoom = 1;
@@ -32,11 +35,6 @@ if ($map_data && is_array($map_data)) {
     $map_address = isset($map_data['address']) ? sanitize_text_field($map_data['address']) : $map_address;
 }
 
-//$zoom_data = get_field('zoom_level');
-//if ($zoom_data) {
-//    $map_zoom = absint($zoom_data);
-//}
-
 // Fetch all posts with map data (no category filter).
 $args = array(
     'numberposts' => apply_filters('map_blocks_posts_limit', 2000),
@@ -49,6 +47,28 @@ $args = array(
     )
 );
 $myposts = get_posts($args);
+
+// Build GeoJSON features array for Supercluster
+$markers_data = array();
+foreach ($myposts as $post) {
+    $post_location = get_field('map', $post);
+    if ($post_location && is_array($post_location) && isset($post_location['lat']) && isset($post_location['lng'])) {
+        $markers_data[] = array(
+            'type' => 'Feature',
+            'geometry' => array(
+                'type' => 'Point',
+                'coordinates' => array(
+                    floatval($post_location['lng']),  // GeoJSON uses [lng, lat]
+                    floatval($post_location['lat'])
+                )
+            ),
+            'properties' => array(
+                'title' => esc_html(get_the_title($post)),
+                'url' => esc_url(get_permalink($post))
+            )
+        );
+    }
+}
 
 // Build noscript fallback URL.
 $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
@@ -68,7 +88,8 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
     </noscript>
 
     <script type="module">
-        import { Map, TileLayer, Marker, Icon } from '<?php echo esc_url(map_blocks_get_leaflet_url()); ?>';
+        import { Map, TileLayer, Marker, Icon, DivIcon, FeatureGroup } from '<?php echo esc_url(map_blocks_get_leaflet_url()); ?>';
+        import Supercluster from '<?php echo esc_url(map_blocks_get_supercluster_url()); ?>';
 
         // Fix default marker icon path for ES module loading
         Icon.Default.prototype.options.imagePath = '<?php echo esc_url(plugins_url('/lib/images/', dirname(__FILE__, 2))); ?>';
@@ -89,25 +110,95 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
                     accessToken: '<?php echo esc_attr(map_blocks_get_mapbox_token()); ?>'
                 }).addTo(leafletmap);
 
-                <?php
-                foreach ($myposts as $post) {
-                    setup_postdata($post);
-                    $post_location = get_field('map', $post);
+                // GeoJSON point data from PHP
+                const points = <?php echo wp_json_encode($markers_data); ?>;
 
-                    if ($post_location && is_array($post_location) && isset($post_location['lat']) && isset($post_location['lng'])) {
-                        $post_lat = floatval($post_location['lat']);
-                        $post_lng = floatval($post_location['lng']);
-                        $post_title = esc_html(get_the_title($post));
-                        $post_url = esc_url(get_permalink($post));
-                        $popup_html = '<a href="' . $post_url . '">' . $post_title . '</a>';
-                        ?>
-                        new Marker([<?php echo $post_lat; ?>, <?php echo $post_lng; ?>]).addTo(leafletmap)
-                            .bindPopup(<?php echo wp_json_encode($popup_html); ?>);
-                        <?php
-                    }
+                // Initialize Supercluster
+                const index = new Supercluster({
+                    radius: 60,
+                    maxZoom: 16,
+                    minPoints: 2
+                });
+                index.load(points);
+
+                // Layer group for markers
+                const markersLayer = new FeatureGroup().addTo(leafletmap);
+
+                // Get cluster size class
+                function getClusterClass(count) {
+                    if (count < 10) return 'map-blocks-cluster-small';
+                    if (count < 100) return 'map-blocks-cluster-medium';
+                    return 'map-blocks-cluster-large';
                 }
-                wp_reset_postdata();
-                ?>
+
+                // Update clusters on map move/zoom
+                function updateClusters() {
+                    markersLayer.clearLayers();
+
+                    const bounds = leafletmap.getBounds();
+                    const bbox = [
+                        bounds.getWest(),
+                        bounds.getSouth(),
+                        bounds.getEast(),
+                        bounds.getNorth()
+                    ];
+                    const zoom = Math.floor(leafletmap.getZoom());
+
+                    const clusters = index.getClusters(bbox, zoom);
+
+                    clusters.forEach(feature => {
+                        const [lng, lat] = feature.geometry.coordinates;
+
+                        if (feature.properties.cluster) {
+                            // Cluster marker
+                            const count = feature.properties.point_count;
+                            const clusterId = feature.properties.cluster_id;
+                            const sizeClass = getClusterClass(count);
+
+                            const clusterIcon = new DivIcon({
+                                html: `<div class="map-blocks-cluster ${sizeClass}">${feature.properties.point_count_abbreviated}</div>`,
+                                className: '',
+                                iconSize: [40, 40],
+                                iconAnchor: [20, 20]
+                            });
+
+                            const clusterMarker = new Marker([lat, lng], { icon: clusterIcon });
+
+                            // Click to zoom into cluster
+                            clusterMarker.on('click', () => {
+                                const expansionZoom = index.getClusterExpansionZoom(clusterId);
+                                leafletmap.setView([lat, lng], expansionZoom);
+                            });
+
+                            clusterMarker.addTo(markersLayer);
+                        } else {
+                            // Individual marker
+                            const popupHtml = `<a href="${feature.properties.url}">${feature.properties.title}</a>`;
+
+                            if (zoom <= 2) {
+                                // At low zoom, use cluster style for visual consistency
+                                const singleIcon = new DivIcon({
+                                    html: `<div class="map-blocks-cluster map-blocks-cluster-small">1</div>`,
+                                    className: '',
+                                    iconSize: [32, 32],
+                                    iconAnchor: [16, 16]
+                                });
+                                const marker = new Marker([lat, lng], { icon: singleIcon });
+                                marker.bindPopup(popupHtml);
+                                marker.addTo(markersLayer);
+                            } else {
+                                // Normal pin marker at higher zoom
+                                const marker = new Marker([lat, lng]);
+                                marker.bindPopup(popupHtml);
+                                marker.addTo(markersLayer);
+                            }
+                        }
+                    });
+                }
+
+                leafletmap.on('moveend', updateClusters);
+                updateClusters();
+
             } catch (error) {
                 console.error('Map Blocks: Failed to initialize map', error);
             }
