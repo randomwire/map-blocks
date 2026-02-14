@@ -41,7 +41,7 @@ $popup_html = '<a href="' . esc_url($popup_url) . '" target="_blank">' . esc_htm
 
     <div id="<?php echo esc_attr($id); ?>"
          class="<?php echo esc_attr($classes); ?>"
-         style="height:300px"
+         style="height:300px;border-radius:8px"
          role="application"
          aria-label="<?php echo esc_attr(__('Interactive map', 'map-blocks')); ?>">
     </div>

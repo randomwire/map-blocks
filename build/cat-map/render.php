@@ -65,7 +65,7 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 <?php if (!empty($map)) { ?>
     <div id="<?php echo esc_attr($id); ?>"
          class="<?php echo esc_attr($classes); ?>"
-         style="height:400px"
+         style="height:400px;border-radius:8px"
          role="application"
          aria-label="<?php echo esc_attr(__('Interactive map showing category locations', 'map-blocks')); ?>">
     </div>

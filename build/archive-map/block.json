@@ -9,6 +9,8 @@
         "mode": "preview",
         "renderTemplate": "render.php"
     },
-    "align": ["wide", "full"],
-    "style": "lib-css-map-blocks"
+    "supports": {
+        "align": ["wide", "full"]
+    },
+    "style": ["lib-css-map-blocks", "lib-css-map-blocks-cluster"]
 }

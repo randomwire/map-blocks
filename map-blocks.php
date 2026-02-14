@@ -3,7 +3,7 @@
  * Plugin Name:       Map Blocks
  * Plugin URI:        https://randomwire.com/plugins/map-blocks/
  * Description:       Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
- * Version:           1.0.0
+ * Version:           1.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            David Gilbert
@@ -26,6 +26,14 @@ function map_blocks_register() {
 
 	wp_register_style( 'lib-css-map-blocks', plugins_url($lib_style_path, __FILE__), array(), $lib_version );
 
+	// Register cluster CSS
+	wp_register_style(
+		'lib-css-map-blocks-cluster',
+		plugins_url('/lib/cluster.css', __FILE__),
+		array('lib-css-map-blocks'),
+		'1.0.0'
+	);
+
 	// Register blocks
 	register_block_type( __DIR__ . '/build/post-map');
 	register_block_type( __DIR__ . '/build/cat-map');
@@ -34,6 +42,10 @@ function map_blocks_register() {
 
 function map_blocks_get_leaflet_url() {
 	return plugins_url('/lib/leaflet.js', __FILE__);
+}
+
+function map_blocks_get_supercluster_url() {
+	return plugins_url('/lib/supercluster.js', __FILE__);
 }
 
 /**
