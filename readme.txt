@@ -4,7 +4,7 @@ Tags: gutenberg, blocks, maps, leaflet, acf
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,9 @@ No, Advanced Custom Fields is required. The plugin reads location data from ACF 
 3. Settings page for Mapbox token
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix map tiles not rendering by moving border-radius to CSS stylesheet
 
 = 1.2.0 =
 * Add marker clustering support with Supercluster.js library
