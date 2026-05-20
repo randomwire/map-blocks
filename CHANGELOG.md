@@ -3,7 +3,6 @@
 ## 1.2.1 - 2026-02-14
 
 - Fix map tiles not rendering by moving border-radius to CSS stylesheet
-- Add plugin stylesheet (map-blocks.css) for block container styles
 
 ## 1.2.0 - 2026-01-25
 
