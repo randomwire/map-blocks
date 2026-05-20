@@ -3,7 +3,7 @@
  * Plugin Name:       Map Blocks
  * Plugin URI:        https://randomwire.com/plugins/map-blocks/
  * Description:       Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
- * Version:           1.2.1
+ * Version:           2.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            David Gilbert
@@ -18,6 +18,8 @@
 if (! defined('ABSPATH')) {
     exit;
 }
+
+define('MAP_BLOCKS_VERSION', '2.2.0');
 
 function map_blocks_register() {
 	// Enqueue lib assets
@@ -41,11 +43,11 @@ function map_blocks_register() {
 }
 
 function map_blocks_get_leaflet_url() {
-	return plugins_url('/lib/leaflet.js', __FILE__);
+	return plugins_url('/lib/leaflet.js', __FILE__) . '?ver=' . MAP_BLOCKS_VERSION;
 }
 
 function map_blocks_get_supercluster_url() {
-	return plugins_url('/lib/supercluster.js', __FILE__);
+	return plugins_url('/lib/supercluster.js', __FILE__) . '?ver=' . MAP_BLOCKS_VERSION;
 }
 
 /**
@@ -89,5 +91,25 @@ function map_blocks_get_mapbox_token() {
 	return get_option('map_blocks_mapbox_token', '');
 }
 
+/**
+ * Show an admin notice when the Mapbox access token has not been configured.
+ */
+function map_blocks_token_missing_notice() {
+	if (!current_user_can('manage_options')) {
+		return;
+	}
+	if (map_blocks_get_mapbox_token() !== '') {
+		return;
+	}
+	echo '<div class="notice notice-warning"><p>' .
+		wp_kses_post(sprintf(
+			/* translators: %s: Settings → General URL */
+			__('Map Blocks needs a Mapbox access token to display map tiles. <a href="%s">Add one in Settings → General</a>.', 'map-blocks'),
+			esc_url(admin_url('options-general.php#map_blocks_mapbox_token'))
+		)) .
+		'</p></div>';
+}
+
 add_action('init', 'map_blocks_register');
 add_action('admin_init', 'map_blocks_register_settings');
+add_action('admin_notices', 'map_blocks_token_missing_notice');

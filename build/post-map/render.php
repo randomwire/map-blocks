@@ -2,19 +2,28 @@
 /**
  * Post Map Block
  *
- * @param   array $block The block settings and attributes.
- * @param   string $content The block inner HTML (empty).
- * @param   bool $is_preview True during backend preview render.
- * @param   int $post_id The post ID the block is rendering content against.
- *          This is either the post ID currently being displayed inside a query loop,
- *          or the post ID of the post hosting this block.
- * @param   array $context The context provided to the block by the post or it's parent block.
+ * @var array    $attributes Block attributes.
+ * @var string   $content    Block inner HTML (empty).
+ * @var WP_Block $block      Block instance.
  */
 
 $id = uniqid('mb_');
 $classes = 'map_blocks';
-if (!empty($block['align'])) {
-    $classes .= ' align' . $block['align'];
+if (!empty($attributes['align'])) {
+    $classes .= ' align' . $attributes['align'];
+}
+
+// Resolve post context (works inside the loop or via block context).
+$post_id = 0;
+if (isset($block) && $block instanceof WP_Block && !empty($block->context['postId'])) {
+    $post_id = (int) $block->context['postId'];
+} else {
+    $post_id = (int) get_the_ID();
+}
+
+// Bail if ACF isn't available.
+if (!function_exists('get_field')) {
+    return;
 }
 
 // Initialize defaults.
@@ -34,7 +43,7 @@ if ($map_data && is_array($map_data)) {
 
 // Build popup HTML for JSON encoding.
 $popup_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
-$popup_html = '<a href="' . esc_url($popup_url) . '" target="_blank">' . esc_html($map_address) . '</a>';
+$popup_html = '<a href="' . esc_url($popup_url) . '" target="_blank" rel="noopener noreferrer">' . esc_html($map_address) . '</a>';
 ?>
 
 <?php if (!empty($map)) { ?>

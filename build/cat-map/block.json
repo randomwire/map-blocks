@@ -1,16 +1,17 @@
 {
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
     "name": "map-blocks/cat-map",
     "title": "Category Map",
     "description": "A block to display the location of posts in a category on a map.",
     "category": "embed",
     "icon": "location-alt",
     "keywords": ["map"],
-    "acf": {
-        "mode": "preview",
-        "renderTemplate": "render.php"
-    },
     "supports": {
-        "align": ["wide", "full"]
+        "align": ["wide", "full"],
+        "html": false
     },
-    "style": "lib-css-map-blocks"
+    "editorScript": "file:./index.js",
+    "style": ["lib-css-map-blocks", "lib-css-map-blocks-cluster"],
+    "render": "file:./render.php"
 }

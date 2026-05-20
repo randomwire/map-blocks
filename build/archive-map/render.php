@@ -4,21 +4,23 @@
  *
  * Displays all posts with a location on a map with marker clustering.
  *
- * Required ACF fields for this block:
+ * Optional ACF field on the hosting page/post:
  * - map (Google Map): Center point for the map
- * - zoom_level (Number): Initial zoom level
  *
- * @param   array $block The block settings and attributes.
- * @param   string $content The block inner HTML (empty).
- * @param   bool $is_preview True during backend preview render.
- * @param   int $post_id The post ID the block is rendering content against.
- * @param   array $context The context provided to the block by the post or its parent block.
+ * @var array    $attributes Block attributes.
+ * @var string   $content    Block inner HTML (empty).
+ * @var WP_Block $block      Block instance.
  */
 
 $id = uniqid('mb_');
 $classes = 'map_blocks';
-if (!empty($block['align'])) {
-    $classes .= ' align' . $block['align'];
+if (!empty($attributes['align'])) {
+    $classes .= ' align' . $attributes['align'];
+}
+
+// Bail if ACF isn't available.
+if (!function_exists('get_field')) {
+    return;
 }
 
 // Initialize defaults (Rome center as fallback).
@@ -70,6 +72,11 @@ foreach ($myposts as $post) {
     }
 }
 
+// Bail if there are no markers to display.
+if (empty($markers_data)) {
+    return;
+}
+
 // Build noscript fallback URL.
 $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 ?>
@@ -111,7 +118,7 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
                 }).addTo(leafletmap);
 
                 // GeoJSON point data from PHP
-                const points = <?php echo wp_json_encode($markers_data); ?>;
+                const points = <?php echo wp_json_encode($markers_data) ?: '[]'; ?>;
 
                 // Initialize Supercluster
                 const index = new Supercluster({

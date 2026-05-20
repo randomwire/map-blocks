@@ -2,9 +2,9 @@
 Contributors: randomwire
 Tags: gutenberg, blocks, maps, leaflet, acf
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 2.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,7 +20,7 @@ Map Blocks provides three custom Gutenberg blocks for displaying interactive map
 
 **Requirements:**
 
-* Advanced Custom Fields (ACF) Pro or Free
+* Advanced Custom Fields (free or Pro), 6.0+
 * ACF field group with Google Map field type
 * Mapbox API token (free tier available at mapbox.com)
 
@@ -55,6 +55,25 @@ No, Advanced Custom Fields is required. The plugin reads location data from ACF 
 3. Settings page for Mapbox token
 
 == Changelog ==
+
+= 2.2.0 =
+* Append plugin version to bundled Leaflet and Supercluster URLs so cache-busting works on upgrade.
+* Show an admin notice when the Mapbox access token has not been configured.
+* Archive Map: render nothing when there are no geocoded posts (matches Post Map and Category Map behaviour).
+* Category Map: honour a stored `zoom_level` of 0.
+* Post Map: add `rel="noopener noreferrer"` to the popup link.
+* Fall back to an empty marker set if JSON encoding of post data fails.
+
+= 2.1.1 =
+* Update bundled KDBush from 4.0.2 to 4.1.0 (performance improvements in radius search).
+* Tested with WordPress 7.0.
+
+= 2.1.0 =
+* Category Map now uses marker clustering (Supercluster), matching Archive Map behaviour.
+
+= 2.0.0 =
+* Remove ACF Pro dependency: blocks now register via WordPress core's native server-side render and work with the free Advanced Custom Fields plugin.
+* In-editor preview replaced with a static placeholder; frontend output is unchanged.
 
 = 1.2.1 =
 * Fix map tiles not rendering by moving border-radius to CSS stylesheet
