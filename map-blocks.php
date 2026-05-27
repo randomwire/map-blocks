@@ -1,13 +1,14 @@
 <?php
 /**
  * Plugin Name:       Map Blocks
- * Plugin URI:        https://randomwire.com/plugins/map-blocks/
+ * Plugin URI:        https://github.com/randomwire/map-blocks
  * Description:       Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
  * Version:           2.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
+ * Requires Plugins:  advanced-custom-fields
  * Author:            David Gilbert
- * Author URI:        https://randomwire.com/
+ * Author URI:        https://randomwire.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       map-blocks

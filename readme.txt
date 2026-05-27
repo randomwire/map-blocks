@@ -1,5 +1,6 @@
 === Map Blocks ===
 Contributors: randomwire
+Donate link: https://ko-fi.com/randomwire
 Tags: gutenberg, blocks, maps, leaflet, acf
 Requires at least: 6.0
 Tested up to: 7.0
@@ -47,6 +48,17 @@ Use the Google Map field type in ACF. The plugin reads latitude and longitude fr
 = Does this work without ACF? =
 
 No, Advanced Custom Fields is required. The plugin reads location data from ACF fields.
+
+== External services ==
+
+This plugin loads map tiles from Mapbox so it can render interactive maps on the front end.
+
+When a visitor views a page containing a Map Blocks block, the visitor's browser requests raster map tiles from `https://api.mapbox.com/` using the Mapbox access token you configured under Settings > General. Each tile request includes the requesting page's referrer and the visitor's IP address (handled by Mapbox, not by this plugin). No personal data from your WordPress install is transmitted by the plugin itself. Tiles are only requested when a block is rendered; no calls are made from the WordPress admin.
+
+Mapbox is a third-party service operated by Mapbox, Inc.
+
+* Terms of service: https://www.mapbox.com/legal/tos
+* Privacy policy: https://www.mapbox.com/legal/privacy
 
 == Screenshots ==
 
