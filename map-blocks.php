@@ -3,7 +3,7 @@
  * Plugin Name:       Map Blocks
  * Plugin URI:        https://github.com/randomwire/map-blocks
  * Description:       Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
- * Version:           2.2.1
+ * Version:           2.2.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Requires Plugins:  advanced-custom-fields
@@ -111,6 +111,22 @@ function map_blocks_token_missing_notice() {
 		'</p></div>';
 }
 
+/**
+ * Add a Donate link to the plugin's row on the Plugins admin page.
+ *
+ * @param string[] $links Existing row meta links.
+ * @param string   $file  Plugin file path relative to the plugins directory.
+ * @return string[] Filtered row meta links.
+ */
+function map_blocks_plugin_row_meta($links, $file) {
+	if ($file === plugin_basename(__FILE__)) {
+		$links[] = '<a href="https://ko-fi.com/randomwire" target="_blank" rel="noopener noreferrer">' .
+			esc_html__('Donate', 'map-blocks') . '</a>';
+	}
+	return $links;
+}
+
 add_action('init', 'map_blocks_register');
 add_action('admin_init', 'map_blocks_register_settings');
 add_action('admin_notices', 'map_blocks_token_missing_notice');
+add_filter('plugin_row_meta', 'map_blocks_plugin_row_meta', 10, 2);
