@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1
+
+- Archive Map: fit the initial view to the actual marker bounds instead of a fixed Rome center, eliminating a thin grey strip that appeared above the tiles at low zoom. Adds `maxBounds` and `minZoom` to keep the viewport inside Mercator tile coverage when panning or zooming out.
+
 ## 2.2.0
 
 - Append plugin version to bundled Leaflet and Supercluster URLs so cache-busting works on upgrade.

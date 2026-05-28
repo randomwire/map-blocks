@@ -106,7 +106,12 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
             console.error('Map Blocks: Map element not found');
         } else {
             try {
-                const leafletmap = new Map('<?php echo esc_attr($id); ?>').setView([<?php echo floatval($map_lat); ?>, <?php echo floatval($map_lng); ?>], <?php echo absint($map_zoom); ?>);
+                const leafletmap = new Map('<?php echo esc_attr($id); ?>', {
+                    worldCopyJump: true,
+                    minZoom: 1,
+                    maxBounds: [[-85, -180], [85, 180]],
+                    maxBoundsViscosity: 1.0
+                });
 
                 new TileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
                     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -119,6 +124,22 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 
                 // GeoJSON point data from PHP
                 const points = <?php echo wp_json_encode($markers_data) ?: '[]'; ?>;
+
+                // Fit map to data bounds, falling back to a near-equator view
+                // so the viewport stays inside Mercator tile coverage at low zoom.
+                if (points.length > 0) {
+                    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+                    for (const f of points) {
+                        const [lng, lat] = f.geometry.coordinates;
+                        if (lat < minLat) minLat = lat;
+                        if (lat > maxLat) maxLat = lat;
+                        if (lng < minLng) minLng = lng;
+                        if (lng > maxLng) maxLng = lng;
+                    }
+                    leafletmap.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [20, 20], maxZoom: 6 });
+                } else {
+                    leafletmap.setView([20, 0], 2);
+                }
 
                 // Initialize Supercluster
                 const index = new Supercluster({
