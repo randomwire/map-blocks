@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2
+
+- Add a Donate link to the plugin's row on the Plugins admin page, matching other Randomwire plugins.
+
 ## 2.2.1
 
 - Archive Map: fit the initial view to the actual marker bounds instead of a fixed Rome center, eliminating a thin grey strip that appeared above the tiles at low zoom. Adds `maxBounds` and `minZoom` to keep the viewport inside Mercator tile coverage when panning or zooming out.

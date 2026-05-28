@@ -5,7 +5,7 @@ Tags: gutenberg, blocks, maps, leaflet, acf
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,9 @@ Mapbox is a third-party service operated by Mapbox, Inc.
 3. Settings page for Mapbox token
 
 == Changelog ==
+
+= 2.2.2 =
+* Add a Donate link to the plugin's row on the Plugins admin page, matching other Randomwire plugins.
 
 = 2.2.1 =
 * Archive Map: fit the initial view to the actual marker bounds instead of a fixed Rome center, eliminating a thin grey strip that appeared above the tiles at low zoom. Adds `maxBounds` and `minZoom` to keep the viewport inside Mercator tile coverage when panning or zooming out.
