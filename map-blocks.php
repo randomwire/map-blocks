@@ -3,7 +3,7 @@
  * Plugin Name:       Map Blocks
  * Plugin URI:        https://github.com/randomwire/map-blocks
  * Description:       Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
- * Version:           2.2.2
+ * Version:           2.3.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Requires Plugins:  advanced-custom-fields
@@ -23,7 +23,7 @@ if (! defined('ABSPATH')) {
 require_once __DIR__ . '/includes/updater.php';
 randomwire_init_github_updater( __FILE__ );
 
-define('MAP_BLOCKS_VERSION', '2.2.2');
+define('MAP_BLOCKS_VERSION', '2.3.0');
 
 function map_blocks_register() {
 	// Enqueue lib assets

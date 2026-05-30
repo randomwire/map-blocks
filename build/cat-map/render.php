@@ -24,27 +24,6 @@ if (empty($cat_id)) {
     return;
 }
 
-// Initialize defaults.
-$map = null;
-$map_zoom = 10;
-$map_lat = 0;
-$map_lng = 0;
-$map_address = '';
-
-// Load category map values and validate.
-$map_data = get_field('map', 'category_' . $cat_id);
-if ($map_data && is_array($map_data)) {
-    $map = $map_data;
-    $map_lat = isset($map_data['lat']) ? floatval($map_data['lat']) : 0;
-    $map_lng = isset($map_data['lng']) ? floatval($map_data['lng']) : 0;
-    $map_address = isset($map_data['address']) ? sanitize_text_field($map_data['address']) : '';
-}
-
-$zoom_data = get_field('zoom_level', 'category_' . $cat_id);
-if (is_numeric($zoom_data)) {
-    $map_zoom = absint($zoom_data);
-}
-
 // Fetch posts with map data for the current category.
 $args = array(
     'category' => $cat_id,
@@ -81,11 +60,9 @@ foreach ($myposts as $post) {
     }
 }
 
-// Build noscript fallback URL.
-$noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 ?>
 
-<?php if (!empty($map)) { ?>
+<?php if (!empty($markers_data)) { ?>
     <div id="<?php echo esc_attr($id); ?>"
          class="<?php echo esc_attr($classes); ?>"
          style="height:400px;border-radius:8px"
@@ -94,8 +71,8 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
     </div>
     <noscript>
         <p><?php esc_html_e('Map requires JavaScript.', 'map-blocks'); ?></p>
-        <a href="<?php echo esc_url($noscript_url); ?>">
-            <?php esc_html_e('View in Google Maps', 'map-blocks'); ?>
+        <a href="<?php echo esc_url(get_category_link($cat_id)); ?>">
+            <?php esc_html_e('View category', 'map-blocks'); ?>
         </a>
     </noscript>
 
@@ -111,7 +88,7 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
             console.error('Map Blocks: Map element not found');
         } else {
             try {
-                const leafletmap = new Map('<?php echo esc_attr($id); ?>').setView([<?php echo floatval($map_lat); ?>, <?php echo floatval($map_lng); ?>], <?php echo absint($map_zoom); ?>);
+                const leafletmap = new Map('<?php echo esc_attr($id); ?>');
 
                 new TileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
                     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -124,6 +101,21 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 
                 // GeoJSON point data from PHP
                 const points = <?php echo wp_json_encode($markers_data) ?: '[]'; ?>;
+
+                // Fit the map to the bounds of the category's pins.
+                if (points.length > 0) {
+                    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+                    for (const f of points) {
+                        const [lng, lat] = f.geometry.coordinates;
+                        if (lat < minLat) minLat = lat;
+                        if (lat > maxLat) maxLat = lat;
+                        if (lng < minLng) minLng = lng;
+                        if (lng > maxLng) maxLng = lng;
+                    }
+                    leafletmap.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [20, 20], maxZoom: 6 });
+                } else {
+                    leafletmap.setView([20, 0], 2);
+                }
 
                 // Initialize Supercluster
                 const index = new Supercluster({

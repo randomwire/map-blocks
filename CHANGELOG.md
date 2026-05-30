@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0
+
+- Category Map: auto-fit the view to the bounds of the category's posts, matching Archive Map. Removes the requirement for category-level `map` (center) and `zoom_level` ACF fields.
+
 ## 2.2.2
 
 - Add a Donate link to the plugin's row on the Plugins admin page, matching other Randomwire plugins.
