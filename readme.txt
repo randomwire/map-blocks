@@ -5,7 +5,7 @@ Tags: gutenberg, blocks, maps, leaflet, acf
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Mapbox is a third-party service operated by Mapbox, Inc.
 3. Settings page for Mapbox token
 
 == Changelog ==
+
+= 2.3.1 =
+* Revert the Category Map auto-fit change from 2.3.0, which had unintended consequences. Category Map again uses the category-level `map` (center) and `zoom_level` ACF fields.
 
 = 2.3.0 =
 * Category Map: auto-fit the view to the bounds of the category's posts, matching Archive Map. Removes the requirement for category-level `map` (center) and `zoom_level` ACF fields.

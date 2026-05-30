@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+
+- Revert the Category Map auto-fit change from 2.3.0, which had unintended consequences. Category Map again uses the category-level `map` (center) and `zoom_level` ACF fields.
+
 ## 2.3.0
 
 - Category Map: auto-fit the view to the bounds of the category's posts, matching Archive Map. Removes the requirement for category-level `map` (center) and `zoom_level` ACF fields.
