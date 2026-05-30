@@ -20,7 +20,10 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('MAP_BLOCKS_VERSION', '2.2.0');
+require_once __DIR__ . '/includes/updater.php';
+randomwire_init_github_updater( __FILE__ );
+
+define('MAP_BLOCKS_VERSION', '2.2.2');
 
 function map_blocks_register() {
 	// Enqueue lib assets
