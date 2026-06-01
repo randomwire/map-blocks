@@ -13,14 +13,13 @@ Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
 ## Blocks Included
 
 - **Post Map** — display a map with a single pin for an individual post
-- **Category Map** — show all posts in a category on a clustered map (renders on category archive pages)
+- **Category Map** — show all posts in a category on a clustered map (renders on category archive pages; auto-focuses on the densest cluster of pins)
 - **Archive Map** — show every post that has a location on a single clustered map
 
 ## Setup
 
-All three blocks render their pins from ACF fields, so the bulk of setup is wiring up ACF correctly.
-The blocks read **specific field names** (`map`, `zoom_level`) — these must match exactly, or the blocks
-render nothing.
+All three blocks render their pins from a single ACF field, so the bulk of setup is wiring up ACF correctly.
+The blocks read a **specific field name** (`map`) — it must match exactly, or the blocks render nothing.
 
 ### 1. Prerequisites: two API keys
 
@@ -53,28 +52,26 @@ see [Quick start with the ACF import](#quick-start-with-the-acf-import)):
 |-------|----------------|-----------|---------------------------|-------|
 | Post Map | `map` | Google Map | Post type → Post | One pin per post |
 | Archive Map | `map` | Google Map | Post type → Post | Shows all posts that have a `map` value |
-| Category Map | `map` | Google Map | Taxonomy → Category | The map's **center point** for the category |
-| Category Map | `zoom_level` | Number | Taxonomy → Category | Initial zoom (e.g. `10`) |
+| Category Map | `map` | Google Map | Post type → Post | Plots every post in the category that has a `map` value |
 
-The Category Map also reads the per-post `map` field to plot each post, and only displays on a
-**category archive page**.
+All three blocks read the same per-post `map` field, so there is just **one field to set up**. Category Map
+and Archive Map have no configuration of their own: Category Map only displays on a **category archive page**
+and automatically focuses the opening view on the densest cluster of its posts' pins (a single far-flung
+post won't zoom the whole map out), while Archive Map fits the view to all pins. Earlier versions required
+category-level `map`/`zoom_level` fields — these are no longer used.
 
 ### 3. Step-by-step walkthrough
 
 1. Install and activate **Advanced Custom Fields** (free or Pro) and **Map Blocks**.
 2. Go to **Settings → General**, paste your **Mapbox Access Token**, and save.
 3. Add the **Google Maps API key** snippet (see [Prerequisites](#1-prerequisites-two-api-keys)).
-4. **Post / Archive maps** — Create a field group (e.g. "Post Location"):
+4. **Create the post field group** (e.g. "Post Location") — this one group powers all three blocks:
    - Add a field, type **Google Map**, field name **`map`**.
    - Set Location rule: **Post Type** is equal to **Post**.
    - Publish.
-5. **Category maps** — Create a second field group (e.g. "Category Map"):
-   - Add a **Google Map** field named **`map`** (the category's center point).
-   - Add a **Number** field named **`zoom_level`** (e.g. `10`).
-   - Set Location rule: **Taxonomy** is equal to **Category**.
-   - Publish. Then edit a category (Posts → Categories) and set its center + zoom.
-6. **Geocode your content** — Edit a post, find the **Map** field, search an address to drop a pin, and update.
-7. **Add a block** — In the editor, insert a block and search "map". Choose Post Map (single post),
+   - Category Map and Archive Map need no extra fields or configuration — they read this same per-post `map` field.
+5. **Geocode your content** — Edit a post, find the **Map** field, search an address to drop a pin, and update.
+6. **Add a block** — In the editor, insert a block and search "map". Choose Post Map (single post),
    Category Map (on a category archive), or Archive Map (anywhere you want all locations).
 
 > **Nothing showing up?** Confirm the field name is exactly `map`, that posts actually have a pin saved,
@@ -88,8 +85,11 @@ To skip manual field creation, import the bundled field groups:
 2. Upload [`acf-export.json`](acf-export.json) from this repo.
 3. Click **Import File**.
 
-This creates the "Post Location" (post `map`) and "Category Map" (category `map` + `zoom_level`)
-groups configured exactly as the blocks expect. You still need to set both API keys (step 2–3 above).
+This creates the "Post Location" group (post `map` field) the blocks expect. You still need to set both
+API keys (walkthrough steps 2–3 above).
+
+> The bundled file also includes a legacy "Category Map" group with `map`/`zoom_level` category fields from
+> older versions. The current plugin ignores it, so you can safely delete that group if it gets imported.
 
 ## Installation
 

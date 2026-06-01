@@ -16,7 +16,7 @@ Gutenberg blocks for displaying maps using Advanced Custom Fields and Leaflet.
 Map Blocks provides three custom Gutenberg blocks for displaying interactive maps:
 
 * **Post Map** - Display a map for a single post with ACF location field
-* **Category Map** - Show all posts in a category on a map
+* **Category Map** - Show all posts in a category on a clustered map (auto-focuses on the densest cluster of pins)
 * **Archive Map** - Display all posts with location data on a map
 
 **Requirements:**
@@ -41,7 +41,7 @@ Uses Leaflet.js for fast, mobile-friendly maps with no Google Maps dependency.
 
 Your Google Maps API key needs the Maps JavaScript API and Geocoding API enabled in the Google Cloud Console.
 
-6. Set up the required ACF fields. The fastest way is to import the bundled field groups: go to ACF > Tools > Import Field Groups and upload the `acf-export.json` file included with the plugin. This creates a "Post Location" group (post field `map`, Google Map type) and a "Category Map" group (category fields `map` and `zoom_level`) configured exactly as the blocks expect. To set them up by hand instead, create a Google Map field named `map` assigned to the Post post type, and a Google Map field named `map` plus a Number field named `zoom_level` assigned to the Category taxonomy. Field names must match exactly.
+6. Set up the required ACF field. All three blocks read a single per-post field named `map`. The fastest way is to import the bundled field group: go to ACF > Tools > Import Field Groups and upload the `acf-export.json` file included with the plugin, which creates a "Post Location" group (post field `map`, Google Map type) configured exactly as the blocks expect. To set it up by hand instead, create a Google Map field named `map` assigned to the Post post type. The field name must match exactly. Category Map and Archive Map need no fields or settings of their own; earlier versions used category-level `map`/`zoom_level` fields, which are no longer required.
 7. Edit a post, find the Map field, search an address to drop a pin, and update.
 8. Add blocks via the block editor (search for "map"). Choose Post Map for a single post, Category Map on a category archive, or Archive Map for all locations.
 
@@ -53,7 +53,7 @@ Yes. Sign up for free at mapbox.com. The free tier includes 50,000 map loads per
 
 = Which ACF field type should I use? =
 
-Use the Google Map field type in ACF. The plugin reads latitude and longitude from this field. Posts need a field named `map`; categories need a `map` field (center point) and a `zoom_level` number field. The field names must match exactly or the blocks render nothing.
+Use the Google Map field type in ACF. The plugin reads latitude and longitude from this field. Posts need a single field named `map`, and the field name must match exactly or the blocks render nothing. Category Map and Archive Map read the same per-post `map` field, so no category-level fields are needed.
 
 = Do I need a Google Maps API key too? =
 
@@ -67,7 +67,7 @@ Enable the Maps JavaScript API and Geocoding API for the key in the Google Cloud
 
 = Is there a faster way to set up the ACF fields? =
 
-Yes. The plugin ships an `acf-export.json` file containing ready-made field groups. Go to ACF > Tools > Import Field Groups, upload `acf-export.json`, and click Import File. This creates the post and category field groups configured exactly as the blocks expect, so you do not have to create the `map` and `zoom_level` fields by hand.
+Yes. The plugin ships an `acf-export.json` file containing a ready-made field group. Go to ACF > Tools > Import Field Groups, upload `acf-export.json`, and click Import File. This creates the "Post Location" group with the `map` field configured exactly as the blocks expect, so you do not have to create it by hand. The file also includes a legacy "Category Map" group from older versions that the current plugin ignores; it is harmless and can be deleted.
 
 = Does this work without ACF? =
 
