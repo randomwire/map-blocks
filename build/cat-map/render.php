@@ -223,9 +223,11 @@ foreach ($myposts as $post) {
                             // Open the popup on the map, not the marker. updateClusters() rebuilds
                             // every marker on 'moveend', and a popup near the edge triggers autoPan
                             // (which fires 'moveend') — a marker-bound popup would be cleared the
-                            // instant it opened. A map-owned popup survives the rebuild.
+                            // instant it opened. A map-owned popup survives the rebuild. The offset
+                            // matches Leaflet's default marker popupAnchor so it floats above the
+                            // pin (rather than over it); autoPan still nudges edge pins into view.
                             marker.on('click', () => {
-                                new Popup({ autoPanPadding: [40, 40] })
+                                new Popup({ offset: [1, -34], autoPanPadding: [40, 40] })
                                     .setLatLng([lat, lng])
                                     .setContent(popupHtml)
                                     .openOn(leafletmap);
