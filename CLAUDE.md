@@ -36,7 +36,7 @@ This plugin has no npm/webpack build process. Leaflet is pre-bundled in `/lib`. 
 - Posts need an ACF field named `map` (Google Map type) — this single per-post field powers all three blocks
 - Category Map and Archive Map need no taxonomy- or page-level fields; the legacy `map`/`zoom_level` category group is unused as of 2.3.2
 - ACF's Google Map field requires a Google Maps JavaScript API key (set via `acf_update_setting('google_api_key', ...)` on `acf/init`) or the editor picker is blank
-- `acf-export.json` (repo root) ships an importable "Post Location" field group matching these requirements (plus the now-unused legacy "Category Map" group)
+- `acf-export.json` (repo root) ships an importable "Post Location" field group matching these requirements
 
 ### Block Registration
 Blocks are registered via `block.json` files that reference:
