@@ -67,7 +67,7 @@ Enable the Maps JavaScript API and Geocoding API for the key in the Google Cloud
 
 = Is there a faster way to set up the ACF fields? =
 
-Yes. The plugin ships an `acf-export.json` file containing a ready-made field group. Go to ACF > Tools > Import Field Groups, upload `acf-export.json`, and click Import File. This creates the "Post Location" group with the `map` field configured exactly as the blocks expect, so you do not have to create it by hand. The file also includes a legacy "Category Map" group from older versions that the current plugin ignores; it is harmless and can be deleted.
+Yes. The plugin ships an `acf-export.json` file containing a ready-made field group. Go to ACF > Tools > Import Field Groups, upload `acf-export.json`, and click Import File. This creates the "Post Location" group with the `map` field configured exactly as the blocks expect, so you do not have to create it by hand.
 
 = Does this work without ACF? =
 

@@ -88,9 +88,6 @@ To skip manual field creation, import the bundled field groups:
 This creates the "Post Location" group (post `map` field) the blocks expect. You still need to set both
 API keys (walkthrough steps 2–3 above).
 
-> The bundled file also includes a legacy "Category Map" group with `map`/`zoom_level` category fields from
-> older versions. The current plugin ignores it, so you can safely delete that group if it gets imported.
-
 ## Installation
 
 See [readme.txt](readme.txt) for end-user installation instructions.
