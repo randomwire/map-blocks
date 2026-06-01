@@ -95,7 +95,7 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
     </noscript>
 
     <script type="module">
-        import { Map, TileLayer, Marker, Icon, DivIcon, FeatureGroup } from '<?php echo esc_url(map_blocks_get_leaflet_url()); ?>';
+        import { Map, TileLayer, Marker, Icon, DivIcon, FeatureGroup, Popup } from '<?php echo esc_url(map_blocks_get_leaflet_url()); ?>';
         import Supercluster from '<?php echo esc_url(map_blocks_get_supercluster_url()); ?>';
 
         // Fix default marker icon path for ES module loading
@@ -203,23 +203,30 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
                             // Individual marker
                             const popupHtml = `<a href="${feature.properties.url}">${feature.properties.title}</a>`;
 
-                            if (zoom <= 2) {
+                            const marker = (zoom <= 2)
                                 // At low zoom, use cluster style for visual consistency
-                                const singleIcon = new DivIcon({
-                                    html: `<div class="map-blocks-cluster map-blocks-cluster-small">1</div>`,
-                                    className: '',
-                                    iconSize: [32, 32],
-                                    iconAnchor: [16, 16]
-                                });
-                                const marker = new Marker([lat, lng], { icon: singleIcon });
-                                marker.bindPopup(popupHtml);
-                                marker.addTo(markersLayer);
-                            } else {
-                                // Normal pin marker at higher zoom
-                                const marker = new Marker([lat, lng]);
-                                marker.bindPopup(popupHtml);
-                                marker.addTo(markersLayer);
-                            }
+                                ? new Marker([lat, lng], {
+                                    icon: new DivIcon({
+                                        html: `<div class="map-blocks-cluster map-blocks-cluster-small">1</div>`,
+                                        className: '',
+                                        iconSize: [32, 32],
+                                        iconAnchor: [16, 16]
+                                    })
+                                })
+                                : new Marker([lat, lng]);
+
+                            // Open the popup on the map, not the marker. updateClusters() rebuilds
+                            // every marker on 'moveend', and a popup near the edge triggers autoPan
+                            // (which fires 'moveend') — a marker-bound popup would be cleared the
+                            // instant it opened. A map-owned popup survives the rebuild.
+                            marker.on('click', () => {
+                                new Popup({ autoPanPadding: [40, 40] })
+                                    .setLatLng([lat, lng])
+                                    .setContent(popupHtml)
+                                    .openOn(leafletmap);
+                            });
+
+                            marker.addTo(markersLayer);
                         }
                     });
                 }
