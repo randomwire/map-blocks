@@ -24,27 +24,6 @@ if (empty($cat_id)) {
     return;
 }
 
-// Initialize defaults.
-$map = null;
-$map_zoom = 10;
-$map_lat = 0;
-$map_lng = 0;
-$map_address = '';
-
-// Load category map values and validate.
-$map_data = get_field('map', 'category_' . $cat_id);
-if ($map_data && is_array($map_data)) {
-    $map = $map_data;
-    $map_lat = isset($map_data['lat']) ? floatval($map_data['lat']) : 0;
-    $map_lng = isset($map_data['lng']) ? floatval($map_data['lng']) : 0;
-    $map_address = isset($map_data['address']) ? sanitize_text_field($map_data['address']) : '';
-}
-
-$zoom_data = get_field('zoom_level', 'category_' . $cat_id);
-if (is_numeric($zoom_data)) {
-    $map_zoom = absint($zoom_data);
-}
-
 // Fetch posts with map data for the current category.
 $args = array(
     'category' => $cat_id,
@@ -81,11 +60,9 @@ foreach ($myposts as $post) {
     }
 }
 
-// Build noscript fallback URL.
-$noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 ?>
 
-<?php if (!empty($map)) { ?>
+<?php if (!empty($markers_data)) { ?>
     <div id="<?php echo esc_attr($id); ?>"
          class="<?php echo esc_attr($classes); ?>"
          style="height:400px;border-radius:8px"
@@ -94,13 +71,13 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
     </div>
     <noscript>
         <p><?php esc_html_e('Map requires JavaScript.', 'map-blocks'); ?></p>
-        <a href="<?php echo esc_url($noscript_url); ?>">
-            <?php esc_html_e('View in Google Maps', 'map-blocks'); ?>
+        <a href="<?php echo esc_url(get_category_link($cat_id)); ?>">
+            <?php esc_html_e('View category', 'map-blocks'); ?>
         </a>
     </noscript>
 
     <script type="module">
-        import { Map, TileLayer, Marker, Icon, DivIcon, FeatureGroup } from '<?php echo esc_url(map_blocks_get_leaflet_url()); ?>';
+        import { Map, TileLayer, Marker, Icon, DivIcon, FeatureGroup, Popup } from '<?php echo esc_url(map_blocks_get_leaflet_url()); ?>';
         import Supercluster from '<?php echo esc_url(map_blocks_get_supercluster_url()); ?>';
 
         // Fix default marker icon path for ES module loading
@@ -111,11 +88,11 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
             console.error('Map Blocks: Map element not found');
         } else {
             try {
-                const leafletmap = new Map('<?php echo esc_attr($id); ?>').setView([<?php echo floatval($map_lat); ?>, <?php echo floatval($map_lng); ?>], <?php echo absint($map_zoom); ?>);
+                const leafletmap = new Map('<?php echo esc_attr($id); ?>');
 
                 new TileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
                     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
-                    maxZoom: 18,
+                    maxZoom: 20,
                     id: 'mapbox/streets-v11',
                     tileSize: 512,
                     zoomOffset: -1,
@@ -124,6 +101,53 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
 
                 // GeoJSON point data from PHP
                 const points = <?php echo wp_json_encode($markers_data) ?: '[]'; ?>;
+
+                // Focus the initial view on the densest area of pins.
+                //
+                // A category (e.g. "Tokyo") is usually tightly clustered but may have
+                // the odd far-flung related post (e.g. a Japanese restaurant in London).
+                // Fitting *all* pins would zoom right out and shrink the core to a dot,
+                // so we trim statistical outliers (median + MAD) and frame the survivors.
+                // Every pin still loads into the cluster index below, so outliers remain
+                // on the map — just outside the opening frame, reachable by zooming out.
+                const median = (arr) => {
+                    if (arr.length === 0) return 0;
+                    const sorted = [...arr].sort((a, b) => a - b);
+                    const mid = Math.floor(sorted.length / 2);
+                    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+                };
+
+                let focusPoints = points;
+                if (points.length >= 4) {
+                    const medLat = median(points.map(f => f.geometry.coordinates[1]));
+                    const medLng = median(points.map(f => f.geometry.coordinates[0]));
+                    const dists = points.map(f => {
+                        const [lng, lat] = f.geometry.coordinates;
+                        return Math.hypot(lat - medLat, lng - medLng);
+                    });
+                    const medDist = median(dists);
+                    const mad = median(dists.map(d => Math.abs(d - medDist)));
+                    // 1.4826 scales MAD to a robust sigma estimate; 3 ~= 3 sigma.
+                    const threshold = medDist + 3 * 1.4826 * mad;
+                    const kept = points.filter((f, i) => dists[i] <= threshold);
+                    if (kept.length >= 2) {
+                        focusPoints = kept;
+                    }
+                }
+
+                if (focusPoints.length > 0) {
+                    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+                    for (const f of focusPoints) {
+                        const [lng, lat] = f.geometry.coordinates;
+                        if (lat < minLat) minLat = lat;
+                        if (lat > maxLat) maxLat = lat;
+                        if (lng < minLng) minLng = lng;
+                        if (lng > maxLng) maxLng = lng;
+                    }
+                    leafletmap.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [20, 20], maxZoom: 16 });
+                } else {
+                    leafletmap.setView([20, 0], 2);
+                }
 
                 // Initialize Supercluster
                 const index = new Supercluster({
@@ -184,21 +208,32 @@ $noscript_url = 'https://maps.google.com/maps?q=' . urlencode($map_address);
                         } else {
                             const popupHtml = `<a href="${feature.properties.url}">${feature.properties.title}</a>`;
 
-                            if (zoom <= 2) {
-                                const singleIcon = new DivIcon({
-                                    html: `<div class="map-blocks-cluster map-blocks-cluster-small">1</div>`,
-                                    className: '',
-                                    iconSize: [32, 32],
-                                    iconAnchor: [16, 16]
-                                });
-                                const marker = new Marker([lat, lng], { icon: singleIcon });
-                                marker.bindPopup(popupHtml);
-                                marker.addTo(markersLayer);
-                            } else {
-                                const marker = new Marker([lat, lng]);
-                                marker.bindPopup(popupHtml);
-                                marker.addTo(markersLayer);
-                            }
+                            const marker = (zoom <= 2)
+                                // At low zoom, use cluster style for visual consistency
+                                ? new Marker([lat, lng], {
+                                    icon: new DivIcon({
+                                        html: `<div class="map-blocks-cluster map-blocks-cluster-small">1</div>`,
+                                        className: '',
+                                        iconSize: [32, 32],
+                                        iconAnchor: [16, 16]
+                                    })
+                                })
+                                : new Marker([lat, lng]);
+
+                            // Open the popup on the map, not the marker. updateClusters() rebuilds
+                            // every marker on 'moveend', and a popup near the edge triggers autoPan
+                            // (which fires 'moveend') — a marker-bound popup would be cleared the
+                            // instant it opened. A map-owned popup survives the rebuild. The offset
+                            // matches Leaflet's default marker popupAnchor so it floats above the
+                            // pin (rather than over it); autoPan still nudges edge pins into view.
+                            marker.on('click', () => {
+                                new Popup({ offset: [1, -34], autoPanPadding: [40, 40] })
+                                    .setLatLng([lat, lng])
+                                    .setContent(popupHtml)
+                                    .openOn(leafletmap);
+                            });
+
+                            marker.addTo(markersLayer);
                         }
                     });
                 }
