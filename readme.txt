@@ -5,7 +5,7 @@ Tags: gutenberg, blocks, maps, leaflet, acf
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Mapbox is a third-party service operated by Mapbox, Inc.
 3. Settings page for Mapbox token
 
 == Changelog ==
+
+= 2.3.2 =
+* Category Map: auto-focus the initial view on the densest area of pins (outlier-robust), replacing the category `map`/`zoom_level` fields. A single far-flung related post no longer zooms the whole map out; all pins remain on the map.
 
 = 2.3.1 =
 * Revert the Category Map auto-fit change from 2.3.0, which had unintended consequences. Category Map again uses the category-level `map` (center) and `zoom_level` ACF fields.

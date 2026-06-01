@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2
+
+- Category Map: auto-focus the initial view on the densest area of pins (outlier-robust), replacing the category `map`/`zoom_level` fields. A single far-flung related post no longer zooms the whole map out; all pins remain on the map.
+
 ## 2.3.1
 
 - Revert the Category Map auto-fit change from 2.3.0, which had unintended consequences. Category Map again uses the category-level `map` (center) and `zoom_level` ACF fields.

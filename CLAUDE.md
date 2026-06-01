@@ -15,16 +15,17 @@ Map Blocks is a WordPress plugin that provides Gutenberg blocks for displaying m
 
 ### Blocks
 1. **Post Map** (`map-blocks/post-map`) - Displays a single map pin for an individual post using the ACF `map` field
-2. **Category Map** (`map-blocks/cat-map`) - Displays clustered pins for all posts in a category that have map data; only renders on a category archive page
+2. **Category Map** (`map-blocks/cat-map`) - Displays clustered pins for all posts in a category that have map data; only renders on a category archive page and auto-focuses the initial view on the densest area of pins
 3. **Archive Map** (`map-blocks/archive-map`) - Displays clustered pins for every published post that has map data; auto-fits the view to the marker bounds
 
 ### Data Flow
 - Blocks use server-side `render.php` templates (WordPress core native render, no ACF Pro dependency)
 - Map data comes from ACF Google Map fields with structure: `{address, lat, lng}`
 - Post Map and Archive Map read the per-post `map` field; Archive Map can also read an optional `map` field on the host page as a center
-- Category Map fetches center/zoom from category-level ACF fields via `get_field('map', 'category_{id}')` and `get_field('zoom_level', 'category_{id}')`
 - Category Map and Archive Map query posts with `meta_query` (key `map`, `compare => EXISTS`) to filter only those with map data
 - Category Map and Archive Map cluster markers client-side with the bundled Supercluster library
+- Archive Map fits the initial view to the bounds of all loaded markers
+- Category Map auto-focuses the initial view on the densest area of its posts' pins: it trims statistical outliers (median + MAD) and fits the bounds of the survivors, so one far-flung related post (e.g. a London restaurant in a "Tokyo" category) doesn't zoom the whole map out. All pins still load and remain reachable by zooming/panning out — only the opening viewport is affected. No per-category center/zoom configuration is needed.
 
 ## Development Notes
 
@@ -33,7 +34,6 @@ This plugin has no npm/webpack build process. Leaflet is pre-bundled in `/lib`. 
 
 ### ACF Field Requirements
 - Posts need an ACF field named `map` (Google Map type)
-- Categories need ACF fields: `map` (center point) and `zoom_level`
 - ACF's Google Map field requires a Google Maps JavaScript API key (set via `acf_update_setting('google_api_key', ...)` on `acf/init`) or the editor picker is blank
 - `acf-export.json` (repo root) ships importable field groups matching these requirements
 
