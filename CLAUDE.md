@@ -33,9 +33,10 @@ Map Blocks is a WordPress plugin that provides Gutenberg blocks for displaying m
 This plugin has no npm/webpack build process. Leaflet is pre-bundled in `/lib`. Edit PHP templates directly.
 
 ### ACF Field Requirements
-- Posts need an ACF field named `map` (Google Map type)
+- Posts need an ACF field named `map` (Google Map type) — this single per-post field powers all three blocks
+- Category Map and Archive Map need no taxonomy- or page-level fields; the legacy `map`/`zoom_level` category group is unused as of 2.3.2
 - ACF's Google Map field requires a Google Maps JavaScript API key (set via `acf_update_setting('google_api_key', ...)` on `acf/init`) or the editor picker is blank
-- `acf-export.json` (repo root) ships importable field groups matching these requirements
+- `acf-export.json` (repo root) ships an importable "Post Location" field group matching these requirements (plus the now-unused legacy "Category Map" group)
 
 ### Block Registration
 Blocks are registered via `block.json` files that reference:
@@ -52,3 +53,8 @@ const map = new Map("id").setView([lat, lng], zoom);
 new TileLayer(url, options).addTo(map);
 new Marker([lat, lng]).addTo(map).bindPopup(content);
 ```
+
+**Initial view & popups (per block):**
+- Post Map uses a fixed `new Map(id).setView([lat,lng], 16)`. Category Map and Archive Map create the map with no initial view and call `fitBounds()` instead: Archive Map fits all markers (`maxZoom: 6`); Category Map fits the densest subset after trimming outliers via median + MAD (`maxZoom: 16`).
+- The Mapbox `TileLayer` is capped at `maxZoom: 20` in all three blocks.
+- In the clustered blocks (Category/Archive), individual-pin popups are opened on the **map** (`new Popup({ offset: [1,-34] }).setLatLng(...).openOn(map)`), **not** bound to the marker. `updateClusters()` rebuilds every marker on `moveend`, and popup autoPan also fires `moveend` — so a marker-bound popup would be destroyed the instant it opened near an edge. The `offset` matches the default marker `popupAnchor` so the popup still floats above the pin. Keep this pattern if you touch the popup code.
