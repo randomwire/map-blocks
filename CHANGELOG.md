@@ -3,6 +3,7 @@
 ## 2.3.2
 
 - Category Map: auto-focus the initial view on the densest area of pins (outlier-robust), replacing the category `map`/`zoom_level` fields. A single far-flung related post no longer zooms the whole map out; all pins remain on the map.
+- All maps: increase the maximum zoom-in level from 18 to 20.
 
 ## 2.3.1
 

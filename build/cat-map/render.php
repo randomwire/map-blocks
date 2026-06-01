@@ -92,7 +92,7 @@ foreach ($myposts as $post) {
 
                 new TileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
                     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
-                    maxZoom: 18,
+                    maxZoom: 20,
                     id: 'mapbox/streets-v11',
                     tileSize: 512,
                     zoomOffset: -1,
@@ -144,7 +144,7 @@ foreach ($myposts as $post) {
                         if (lng < minLng) minLng = lng;
                         if (lng > maxLng) maxLng = lng;
                     }
-                    leafletmap.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [20, 20], maxZoom: 12 });
+                    leafletmap.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [20, 20], maxZoom: 16 });
                 } else {
                     leafletmap.setView([20, 0], 2);
                 }
